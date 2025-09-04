@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Hugo Torres <noreply@redactado.es>
+Date: Thu, 4 Sep 2025 12:55:01 +0200
+Subject: [PATCH] remove the stupid waypoint sharing shit
+
+
+diff --git a/net/minecraft/world/entity/player/Player.java b/net/minecraft/world/entity/player/Player.java
+index 80ce59b79896ff415cf3a93eb6ea3272f42c3d02..2fa0f9db13053e91bab62515e55bbe9252df3564 100755
+--- a/net/minecraft/world/entity/player/Player.java
++++ b/net/minecraft/world/entity/player/Player.java
+@@ -312,7 +312,7 @@ public abstract class Player extends LivingEntity {
+             .add(Attributes.MINING_EFFICIENCY)
+             .add(Attributes.SWEEPING_DAMAGE_RATIO)
+             .add(Attributes.WAYPOINT_TRANSMIT_RANGE, 6.0E7)
+-            .add(Attributes.WAYPOINT_RECEIVE_RANGE, 6.0E7);
++            .add(Attributes.WAYPOINT_RECEIVE_RANGE, 0); // HCF Edit - Remove player waypoints (ik i can do this in game, jst too lazy to make a plugin)
+     }
+ 
+     @Override

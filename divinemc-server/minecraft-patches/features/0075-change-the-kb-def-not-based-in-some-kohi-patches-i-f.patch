@@ -1,0 +1,79 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Hugo Torres <noreply@redactado.es>
+Date: Thu, 4 Sep 2025 14:06:09 +0200
+Subject: [PATCH] change the kb (def not based in some kohi patches i found in
+ bbb lul)
+
+
+diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
+index e903e60c8914899d9be14cce9fdef9cc33ee71d5..c27254e39e30e72cd681ed19a011d182ccb3fc42 100755
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -2125,13 +2125,52 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
+                 z = (Math.random() - Math.random()) * 0.01;
+             }
+ 
+-            Vec3 vec3 = new Vec3(x, 0.0, z).normalize().scale(strength);
+-            // Paper start - knockback events
+-            Vec3 finalVelocity = new Vec3(
+-                deltaMovement.x / 2.0 - vec3.x,
+-                this.onGround() ? Math.min(0.4, deltaMovement.y / 2.0 + strength) : deltaMovement.y,
+-                deltaMovement.z / 2.0 - vec3.z
++            // HCF Edit - just values lul
++            double knockbackFriction = 2.0D;
++            double knockbackHorizontal = 0.35D;
++            double knockbackVertical = 0.35D;
++            double knockbackVerticalLimit = 0.4D;
++            double knockbackExtraHorizontal = 0.425D;
++            double knockbackExtraVertical = 0.085D;
++
++            // HCF Edit - Normalize direction vector
++            double magnitude = Math.sqrt(x * x + z * z);
++            Vec3 vec3 = new Vec3(x / magnitude, 0.0, z / magnitude);
++
++            // HCF Edit - Apply PapuHost friction system
++            Vec3 frictionVelocity = new Vec3(
++                deltaMovement.x / knockbackFriction,
++                deltaMovement.y / knockbackFriction,
++                deltaMovement.z / knockbackFriction
+             );
++
++            // HCF Edit - Apply base knockback
++            Vec3 baseKnockback = new Vec3(
++                frictionVelocity.x - (vec3.x * knockbackHorizontal),
++                this.onGround() ? frictionVelocity.y + knockbackVertical : frictionVelocity.y,
++                frictionVelocity.z - (vec3.z * knockbackHorizontal)
++            );
++
++            // HCF Edit - Apply vertical limit
++            if (baseKnockback.y > knockbackVerticalLimit) {
++                baseKnockback = new Vec3(baseKnockback.x, knockbackVerticalLimit, baseKnockback.z);
++            }
++
++            // HCF Edit - Check for sprint/enchant extra knockback
++            Vec3 finalVelocity = baseKnockback;
++            if (strength > 0) { // Has knockback enchant or sprint
++                finalVelocity = new Vec3(
++                    baseKnockback.x - (vec3.x * knockbackExtraHorizontal * strength),
++                    baseKnockback.y + (knockbackExtraVertical * strength),
++                    baseKnockback.z - (vec3.z * knockbackExtraHorizontal * strength)
++                );
++
++                // HCF Edit - Apply vertical limit again for extra knockback
++                if (finalVelocity.y > knockbackVerticalLimit) {
++                    finalVelocity = new Vec3(finalVelocity.x, knockbackVerticalLimit, finalVelocity.z);
++                }
++            }
++
+             Vec3 diff = finalVelocity.subtract(deltaMovement);
+             io.papermc.paper.event.entity.EntityKnockbackEvent event = CraftEventFactory.callEntityKnockbackEvent((org.bukkit.craftbukkit.entity.CraftLivingEntity) this.getBukkitEntity(), attacker, attacker, eventCause, strength, diff);
+             // Paper end - knockback events
+@@ -2145,6 +2184,8 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
+         }
+     }
+ 
++
++
+     public void indicateDamage(double xDistance, double zDistance) {
+     }
+ 
